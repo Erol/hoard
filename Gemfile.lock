@@ -1,0 +1,18 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    celluloid (0.15.2)
+      timers (~> 1.1.0)
+    cooperator (0.1.1)
+    mini_portile (0.6.0)
+    nokogiri (1.6.2.1)
+      mini_portile (= 0.6.0)
+    timers (1.1.0)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  celluloid
+  cooperator
+  nokogiri
