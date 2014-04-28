@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 
 require 'celluloid'
+require 'cooperator'
 require 'nokogiri'
 require 'open-uri'
 
@@ -22,4 +23,86 @@ module Hoard
       description
     end
   end
+
+  module MangaFox
+    class GrabManga
+      prepend Cooperator
+
+      def perform
+        cooperate GetTitleAndChapters,
+                  GrabChapters
+      end
+    end
+
+    class GetTitleAndChapters
+      prepend Cooperator
+
+      def perform
+        html = Nokogiri::HTML open "http://mangafox.me/manga/#{context.name}/"
+
+        context.title = html.title
+        context.title.gsub!(/ Manga .*$/, '')
+
+        context.chapters = {}
+
+        matches = html.css 'a.tips'
+        matches.reverse.each do |match|
+          href = match['href']
+
+          location = href.gsub(/\/1\.html$/, '')
+          number = /\/c(.*?)\/1\.html$/.match href do |m|
+            m[1]
+          end
+
+          context.chapters[number] = {
+            number: number,
+            location: location
+          }
+        end
+      end
+    end
+
+    class GrabChapters
+      prepend Cooperator
+
+      def selector
+        'img#image'
+      end
+
+      def attribute
+        'src'
+      end
+
+      def perform
+        context.chapters.each do |number, chapter|
+          next unless context.numbers.include? Float number
+
+          html = Nokogiri::HTML open "#{chapter[:location]}/1.html"
+          html.css('select:first option').each do |option|
+            page = "%03d" % option['value']
+
+            next if page == '000'
+
+            description = "#{context.title} - Chapter #{chapter[:number]} - Page #{page}"
+            location = "#{chapter[:location]}/#{page}.html"
+            directory = File.join 'Manga', context.title, "Chapter #{chapter[:number]}"
+            destination = File.join directory, "#{page}.jpg"
+
+            FileUtils.mkdir_p directory
+
+            FUTURES << PAGES.future.process(page, description, location, selector, attribute, destination)
+          end
+        end
+      end
+    end
+  end
 end
+
+PAGES = Hoard::Page.pool size: 10
+FUTURES = []
+
+name = ARGV[0]
+numbers = eval ARGV[1]
+numbers = Array numbers if numbers.is_a? Integer
+
+Hoard::MangaFox::GrabManga.perform name: name, numbers: numbers
