@@ -106,3 +106,7 @@ numbers = eval ARGV[1]
 numbers = Array numbers if numbers.is_a? Integer
 
 Hoard::MangaFox::GrabManga.perform name: name, numbers: numbers
+
+FUTURES.each do |future|
+  future.value
+end
