@@ -1,0 +1,25 @@
+#!/usr/bin/env ruby
+
+require 'celluloid'
+require 'nokogiri'
+require 'open-uri'
+
+module Hoard
+  class Page
+    include Celluloid
+
+    def process(number, description, location, selector, attribute, destination)
+      html = Nokogiri::HTML open location
+
+      matches = html.css selector
+
+      source = matches.first[attribute]
+
+      `curl -sS -o #{destination.inspect} #{source.inspect}`
+
+      puts description
+
+      description
+    end
+  end
+end
