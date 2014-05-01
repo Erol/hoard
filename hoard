@@ -50,9 +50,7 @@ module Hoard
           href = match['href']
 
           location = href.gsub(/\/1\.html$/, '')
-          number = /\/c(.*?)\/1\.html$/.match href do |m|
-            m[1]
-          end
+          number = /\/c(.*?)\/1\.html$/.match(href) { |m| m[1] }
 
           context.chapters[number] = {
             number: number,
