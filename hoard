@@ -44,6 +44,8 @@ module Hoard
         chapters! html
       end
 
+      private
+
       def title!(html)
         context.title = html.title
         context.title.gsub!(/ Manga .*$/, '')
