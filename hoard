@@ -41,7 +41,15 @@ module Hoard
         html = Nokogiri::HTML open "http://mangafox.me/manga/#{context.name}/"
 
         title! html
+        chapters! html
+      end
 
+      def title!(html)
+        context.title = html.title
+        context.title.gsub!(/ Manga .*$/, '')
+      end
+
+      def chapters!(html)
         context.chapters = {}
 
         matches = html.css 'a.tips'
@@ -56,11 +64,6 @@ module Hoard
             location: location
           }
         end
-      end
-
-      def title!(html)
-        context.title = html.title
-        context.title.gsub!(/ Manga .*$/, '')
       end
     end
 
