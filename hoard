@@ -54,7 +54,7 @@ module Hoard
       end
 
       def chapters!(html)
-        context.chapters = {}
+        chapters = {}
 
         matches = html.css 'a.tips'
         matches.reverse.each do |match|
@@ -63,11 +63,13 @@ module Hoard
           location = href.gsub(/\/1\.html$/, '')
           number = /\/c(.*?)\/1\.html$/.match(href) { |m| m[1] }
 
-          context.chapters[number] = {
+          chapters[number] = {
             number: number,
             location: location
           }
         end
+
+        context.chapters = chapters
       end
     end
 
