@@ -47,8 +47,10 @@ module Hoard
       private
 
       def title!(html)
-        context.title = html.title
-        context.title.gsub!(/ Manga .*$/, '')
+        title = html.title
+        title.gsub!(/ Manga .*$/, '')
+
+        context.title = title
       end
 
       def chapters!(html)
