@@ -24,6 +24,10 @@ module Hoard
     end
   end
 
+  def self.MangaFox(context = {})
+    MangaFox::GrabManga.perform context
+  end
+
   module MangaFox
     class GrabManga
       prepend Cooperator
@@ -116,7 +120,7 @@ name = ARGV[0]
 numbers = eval ARGV[1]
 numbers = Array numbers if numbers.is_a? Integer
 
-Hoard::MangaFox::GrabManga.perform name: name, numbers: numbers
+Hoard.MangaFox name: name, numbers: numbers
 
 FUTURES.each do |future|
   future.value
