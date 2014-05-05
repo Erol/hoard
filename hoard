@@ -34,6 +34,7 @@ module Hoard
 
       def perform
         cooperate GetTitleAndChapters,
+                  LimitChapters,
                   GrabChapters
       end
     end
@@ -77,6 +78,16 @@ module Hoard
       end
     end
 
+    class LimitChapters
+      prepend Cooperator
+
+      def perform
+        context.chapters.keys.each do |number|
+          context.chapters.delete number unless context.numbers.include? Float number
+        end
+      end
+    end
+
     class GrabChapters
       prepend Cooperator
 
@@ -90,8 +101,6 @@ module Hoard
 
       def perform
         context.chapters.each do |number, chapter|
-          next unless context.numbers.include? Float number
-
           html = Nokogiri::HTML open "#{chapter[:location]}/1.html"
           html.css('select:first option').each do |option|
             page = "%03d" % option['value']
