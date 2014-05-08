@@ -112,11 +112,15 @@ module Hoard
             directory = File.join 'Manga', context.title, "Chapter #{chapter[:number]}"
             destination = File.join directory, "#{page}.jpg"
 
-            FileUtils.mkdir_p directory
+            prepare! directory
 
             FUTURES << PAGES.future.process(page, description, location, selector, attribute, destination)
           end
         end
+      end
+
+      def prepare!(directory)
+        FileUtils.mkdir_p directory
       end
     end
   end
