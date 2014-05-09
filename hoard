@@ -107,7 +107,12 @@ module Hoard
 
             next if page == '000'
 
-            description = "#{context.title} - Chapter #{chapter[:number]} - Page #{page}"
+            description = [
+              context.title,
+              "Chapter #{chapter[:number]}",
+              "Page #{page}"
+            ].join ' - '
+
             location = "#{chapter[:location]}/#{page}.html"
             directory = File.join 'Manga', context.title, "Chapter #{chapter[:number]}"
             destination = File.join directory, "#{page}.jpg"
