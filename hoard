@@ -124,6 +124,8 @@ module Hoard
         end
       end
 
+      private
+
       def prepare!(directory)
         FileUtils.mkdir_p directory
       end
