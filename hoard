@@ -9,13 +9,7 @@ module Hoard
   class Page
     include Celluloid
 
-    def process(number, description, location, selector, attribute, destination)
-      html = Nokogiri::HTML open location
-
-      matches = html.css selector
-
-      source = matches.first[attribute]
-
+    def process(number, description, source, destination)
       `curl -sS -o #{destination.inspect} #{source.inspect}`
 
       puts description
@@ -66,10 +60,12 @@ module Hoard
           href = match['href']
 
           location = href.gsub(/\/1\.html$/, '')
-          number = /\/c(.*?)\/1\.html$/.match(href) { |m| m[1] }
+          volume, chapter = /\/v(.*?)\/c(.*?)\/1\.html$/.match(href) { |m| [m[1], m[2]] }
+          index = [volume, chapter].join '-'
 
-          chapters[number] = {
-            number: number,
+          chapters[index] = {
+            chapter: chapter,
+            volume: volume,
             location: location
           }
         end
@@ -82,8 +78,8 @@ module Hoard
       prepend Cooperator
 
       def perform
-        context.chapters.keys.each do |number|
-          context.chapters.delete number unless context.numbers.include? Float number
+        context.chapters.select! do |index, chapter|
+          context.volume.match chapter[:volume] and context.chapter.match chapter[:chapter]
         end
       end
     end
@@ -100,8 +96,18 @@ module Hoard
       end
 
       def perform
-        context.chapters.each do |number, chapter|
+        context.chapters.each do |index, chapter|
           html = Nokogiri::HTML open "#{chapter[:location]}/1.html"
+
+          title = html.css("meta[property='og:description']").first['content']
+          title = if title =~ /(.*?: )/
+            title.gsub /(.*?: )/, ''
+          else
+            nil
+          end
+
+          source = html.css(selector).first[attribute]
+
           html.css('select:first option').each do |option|
             page = "%03d" % option['value']
 
@@ -109,17 +115,18 @@ module Hoard
 
             description = [
               context.title,
-              "Chapter #{chapter[:number]}",
-              "Page #{page}"
-            ].join ' - '
+              index,
+              page,
+              title
+            ].compact.join ' - '
 
             location = "#{chapter[:location]}/#{page}.html"
-            directory = File.join 'Manga', context.title, "Chapter #{chapter[:number]}"
+            directory = File.join 'Manga', context.title, [index, title].compact.join(' ')
             destination = File.join directory, "#{page}.jpg"
 
             prepare! directory
 
-            FUTURES << PAGES.future.process(page, description, location, selector, attribute, destination)
+            FUTURES << PAGES.future.process(page, description, source.gsub(/\/1\.jpg$/, "/#{chapter[:chapter]}.jpg"), destination)
           end
         end
       end
@@ -137,10 +144,10 @@ PAGES = Hoard::Page.pool size: 10
 FUTURES = []
 
 name = ARGV[0]
-numbers = eval ARGV[1]
-numbers = Array numbers if numbers.is_a? Integer
+volume = Regexp.new ARGV[1]
+chapter = Regexp.new ARGV[2]
 
-Hoard.MangaFox name: name, numbers: numbers
+Hoard.MangaFox name: name, volume: volume, chapter: chapter
 
 FUTURES.each do |future|
   future.value
