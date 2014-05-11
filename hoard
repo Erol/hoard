@@ -108,7 +108,7 @@ module Hoard
 
           source = html.css(selector).first[attribute]
 
-          html.css('select:first option').each do |option|
+          html.css('.r.m .l select').first.css('option').each do |option|
             page = "%03d" % option['value']
 
             next if page == '000'
