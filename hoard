@@ -9,7 +9,11 @@ module Hoard
   class Page
     include Celluloid
 
-    def process(number, description, source, destination)
+    def process(number, description, location, selector, attribute, destination)
+      html = Nokogiri::HTML open location
+
+      source = html.css(selector).first[attribute]
+
       `curl -sS -o #{destination.inspect} #{source.inspect}`
 
       puts description
@@ -125,8 +129,7 @@ module Hoard
             destination = File.join directory, "#{page}.jpg"
 
             prepare! directory
-
-            FUTURES << PAGES.future.process(page, description, source.gsub(/\/1\.jpg$/, "/#{chapter[:chapter]}.jpg"), destination)
+            FUTURES << PAGES.future.process(page, description, location, selector, attribute, destination)
           end
         end
       end
