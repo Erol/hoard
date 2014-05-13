@@ -112,6 +112,9 @@ module Hoard
 
           source = html.css(selector).first[attribute]
 
+          directory = File.join 'Manga', context.title, [index, title].compact.join(' ')
+          prepare! directory
+
           html.css('.r.m .l select').first.css('option').each do |option|
             page = "%03d" % option['value']
 
@@ -125,10 +128,8 @@ module Hoard
             ].compact.join ' - '
 
             location = "#{chapter[:location]}/#{page}.html"
-            directory = File.join 'Manga', context.title, [index, title].compact.join(' ')
             destination = File.join directory, "#{page}.jpg"
 
-            prepare! directory
             FUTURES << PAGES.future.process(page, description, location, selector, attribute, destination)
           end
         end
