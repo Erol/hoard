@@ -10,10 +10,22 @@ module Hoard
     include Celluloid
 
     def process(number, description, location, selector, attribute, destination)
+      sleep rand
+
       html = Nokogiri::HTML open location
 
       source = html.css(selector).first[attribute]
 
+      FUTURES << IMAGES.future.grab(source, destination, description)
+
+      description
+    end
+  end
+
+  class Image
+    include Celluloid
+
+    def grab(source, destination, description)
       `curl -sS -o #{destination.inspect} #{source.inspect}`
 
       puts description
@@ -144,7 +156,8 @@ module Hoard
   end
 end
 
-PAGES = Hoard::Page.pool size: 10
+PAGES = Hoard::Page.pool size: 2
+IMAGES = Hoard::Image.pool size: 6
 FUTURES = []
 
 name = ARGV[0]
