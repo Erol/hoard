@@ -115,11 +115,9 @@ module Hoard
         context.chapters.each do |index, chapter|
           html = Nokogiri::HTML open "#{chapter[:location]}/1.html"
 
-          title = html.css("meta[property='og:description']").first['content']
-          title = if title =~ /(.*?: )/
-            title.gsub /(.*?: )/, ''
-          else
-            nil
+          title = html.css("meta[property='og:description']").first['content'] rescue nil
+          if title
+            title.gsub! /(.*?: )/, ''
           end
 
           source = html.css(selector).first[attribute]
