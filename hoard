@@ -80,6 +80,7 @@ module Hoard
           index = [volume, chapter].join '-'
 
           chapters[index] = {
+            index: index,
             chapter: chapter,
             volume: volume,
             location: location
@@ -95,7 +96,7 @@ module Hoard
 
       def perform
         context.chapters.select! do |index, chapter|
-          context.volume.match chapter[:volume] and context.chapter.match chapter[:chapter]
+          context.index.match index
         end
       end
     end
@@ -159,10 +160,9 @@ IMAGES = Hoard::Image.pool size: 6
 FUTURES = []
 
 name = ARGV[0]
-volume = Regexp.new ARGV[1]
-chapter = Regexp.new ARGV[2]
+index = Regexp.new ARGV[1]
 
-Hoard.MangaFox name: name, volume: volume, chapter: chapter
+Hoard.MangaFox name: name, index: index
 
 FUTURES.each do |future|
   future.value
