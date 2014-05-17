@@ -76,8 +76,8 @@ module Hoard
           href = match['href']
 
           location = href.gsub(/\/1\.html$/, '')
-          volume, chapter = /\/v(.*?)\/c(.*?)\/1\.html$/.match(href) { |m| [m[1], m[2]] }
-          index = [volume, chapter].join '-'
+          volume, chapter = /(\/v(?<volume>.*?))?(\/c(?<chapter>.*?))?\/\d+\.html$/.match(href) { |m| [m[:volume], m[:chapter]]}
+          index = [volume, chapter].compact.join '-'
 
           chapters[index] = {
             index: index,
