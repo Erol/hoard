@@ -26,7 +26,7 @@ module Hoard
     include Celluloid
 
     def grab(source, destination, description)
-      `curl -sS -o #{destination.inspect} #{source.inspect}`
+      `curl --retry 3 -sS -o #{destination.inspect} #{source.inspect}`
 
       puts description
 
@@ -76,7 +76,7 @@ module Hoard
           href = match['href']
 
           location = href.gsub(/\/1\.html$/, '')
-          volume, chapter = /(\/v(?<volume>.*?))?(\/c(?<chapter>.*?))?\/\d+\.html$/.match(href) { |m| [m[:volume], m[:chapter]]}
+          volume, chapter = /(\/v(?<volume>.*?))?(\/c(?<chapter>\d+?))?\/\d+\.html$/.match(href) { |m| [m[:volume], m[:chapter]]}
           index = [volume, chapter].compact.join '-'
 
           chapters[index] = {
