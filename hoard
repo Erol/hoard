@@ -160,7 +160,7 @@ IMAGES = Hoard::Image.pool size: 6
 FUTURES = []
 
 name = ARGV[0]
-index = Regexp.new ARGV[1]
+index = Regexp.new (ARGV[1] || '.*')
 
 Hoard.MangaFox name: name, index: index
 
