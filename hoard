@@ -117,9 +117,7 @@ module Hoard
           html = Nokogiri::HTML open "#{chapter[:location]}/1.html"
 
           title = html.css("meta[property='og:description']").first['content'] rescue nil
-          if title
-            title.gsub! /(.*?: )/, ''
-          end
+          title.gsub! /(.*?: )/, '' if title
 
           source = html.css(selector).first[attribute]
 
